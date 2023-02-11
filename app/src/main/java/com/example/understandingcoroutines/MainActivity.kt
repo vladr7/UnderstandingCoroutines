@@ -26,10 +26,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     val viewModel = MainViewModel()
-                    runBlocking {
-                        delay(5000L) // block the main thread for 5s
-                    }
-                    Greeting("${Random.nextInt()}")
+                    Greeting("Android")
                 }
             }
         }

@@ -2,21 +2,26 @@ package com.example.understandingcoroutines
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
-class MainViewModel: ViewModel() {
+class MainViewModel : ViewModel() {
 
     init {
         main()
     }
 
     private fun main() = runBlocking {
-        launch { // launch a new coroutine and continue
-            delay(1000L) // non-blocking delay for 1 second (default time unit is ms)
-            println("World!") // print after delay
+        doWorld()
+    }
+
+    private suspend fun doWorld() = coroutineScope {
+        val job = launch {
+            delay(2000L)
+            println("World")
+            delay(1000L)
         }
-        println("Hello") // main coroutine continues while a previous one is delayed
+        println("Hello!")
+        job.join()
+        println("Done")
     }
 }
