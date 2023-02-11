@@ -11,6 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.understandingcoroutines.ui.theme.UnderstandingCoroutinesTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +25,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Greeting("Android")
+                    val viewModel = MainViewModel()
+                    runBlocking {
+                        delay(5000L) // block the main thread for 5s
+                    }
+                    Greeting("${Random.nextInt()}")
                 }
             }
         }
