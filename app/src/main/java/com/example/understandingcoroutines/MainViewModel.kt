@@ -11,7 +11,18 @@ class MainViewModel : ViewModel() {
     }
 
     private fun main() = runBlocking {
-        doWorld()
+        val deffered = async {
+            loadData()
+        }
+        println("waiting...")
+        println(deffered.await())
+    }
+
+    suspend fun loadData(): Int {
+        println("loading...")
+        delay(1000L)
+        println("loaded!")
+        return 42
     }
 
     private suspend fun doWorld() = coroutineScope {
