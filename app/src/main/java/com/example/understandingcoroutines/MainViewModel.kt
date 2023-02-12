@@ -11,11 +11,19 @@ class MainViewModel : ViewModel() {
     }
 
     private fun main() = runBlocking {
+        // also try out launch{}
         val deffered = async {
             loadData()
         }
+        val deffered2 = async {
+            loadData2()
+        }
         println("waiting...")
-        println(deffered.await())
+//        val list = listOf(deffered, deffered2)
+//        list.awaitAll()
+        val result1 = deffered.await()
+        val result2 = deffered2.await()
+        println("${result1} + ${result2}")
     }
 
     suspend fun loadData(): Int {
@@ -23,6 +31,13 @@ class MainViewModel : ViewModel() {
         delay(1000L)
         println("loaded!")
         return 42
+    }
+
+    private suspend fun loadData2(): Int {
+        println("loading2...")
+        delay(1000L)
+        println("loaded2!")
+        return 100
     }
 
     private suspend fun doWorld() = coroutineScope {
