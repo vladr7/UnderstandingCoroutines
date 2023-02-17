@@ -6,37 +6,23 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlin.coroutines.resume
 
 class MainViewModel : ViewModel() {
 
     init {
-//        fooWithTimeoutOrNull()
-//        barWithTimeoutOrNull()
-    }
-
-    private fun fooWithTimeoutOrNull() {
         viewModelScope.launch {
-            val result = withTimeoutOrNull(1300L) {
-                repeat(1000) { i -> // repeat 1000
-                    println("I'm sleeping $i ...")
-                    delay(500L)
-                }
-                "Done"// will get cancelled before it produces this result
+            val result = suspendCancellableCoroutine<Boolean> { continuation ->
+                redeemPass(continuation)
             }
-            println("Result is $result")
+            delay(1500L)
+            println(result)
         }
     }
 
-    private fun barWithTimeoutOrNull() {
-        viewModelScope.launch {
-            val result = withTimeoutOrNull(1300L) {
-                repeat(1) { i -> // repeat 1
-                    println("I'm sleeping $i ...")
-                    delay(500L)
-                }
-                "Done"// will NOT get cancelled
-            }
-            println("Result is $result")
-        }
+    private fun redeemPass(
+        continuation: CancellableContinuation<Boolean>,
+    ) {
+        continuation.resume(true)
     }
 }
