@@ -10,18 +10,33 @@ import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 class MainViewModel : ViewModel() {
 
     init {
+//        fooWithTimeoutOrNull()
+//        barWithTimeoutOrNull()
+    }
+
+    private fun fooWithTimeoutOrNull() {
         viewModelScope.launch {
-            val job = async {
-                repeat(1000) { i ->
-                    println("job: I'm sleeping $i ...")
+            val result = withTimeoutOrNull(1300L) {
+                repeat(1000) { i -> // repeat 1000
+                    println("I'm sleeping $i ...")
                     delay(500L)
                 }
+                "Done"// will get cancelled before it produces this result
             }
-            delay(3300L) // delay a bit
-            println("main: I'm tired of waiting!")
-            job.cancel() // cancels the job
-            job.join() // waits for job's completion
-            println("main: Now I can quit.")
+            println("Result is $result")
+        }
+    }
+
+    private fun barWithTimeoutOrNull() {
+        viewModelScope.launch {
+            val result = withTimeoutOrNull(1300L) {
+                repeat(1) { i -> // repeat 1
+                    println("I'm sleeping $i ...")
+                    delay(500L)
+                }
+                "Done"// will NOT get cancelled
+            }
+            println("Result is $result")
         }
     }
 }
