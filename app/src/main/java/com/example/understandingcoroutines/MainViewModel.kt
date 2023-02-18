@@ -12,17 +12,23 @@ class MainViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            val result = suspendCancellableCoroutine<Boolean> { continuation ->
-                redeemPass(continuation)
-            }
-            delay(1500L)
-            println(result)
+            val task1 = async { doSomethingUsefulOne() }
+            val task2 = async { doSomethingUsefulTwo() }
+            val result1 = task1.await()
+            val result2 = task2.await()
+            println("${result1 + result2}")
         }
     }
 
-    private fun redeemPass(
-        continuation: CancellableContinuation<Boolean>,
-    ) {
-        continuation.resume(true)
+    suspend fun doSomethingUsefulOne(): Int {
+        delay(2000L) // pretend we are doing something useful here
+        println("Done")
+        return 13
+    }
+
+    suspend fun doSomethingUsefulTwo(): Int {
+        delay(2000L) // pretend we are doing something useful here, too
+        println("Done")
+        return 29
     }
 }
