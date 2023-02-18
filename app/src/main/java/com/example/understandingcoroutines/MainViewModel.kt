@@ -20,9 +20,9 @@ class MainViewModel : ViewModel() {
     fun main() = runBlocking<Unit> {
         val time = measureTimeMillis {
             simple()
-                .buffer()
+                .conflate() // conflate emissions, don't process each one
                 .collect { value ->
-                    delay(2000)
+                    delay(3000) // pretend we are processing it for 3000 ms
                     println(value)
                 }
         }
@@ -30,9 +30,9 @@ class MainViewModel : ViewModel() {
     }
 
     fun simple(): Flow<Int> = flow {
-        for (i in 1..3) {
-            delay(1000)
-            emit(i)
+        for (i in 1..10) {
+            delay(100) // pretend we are asynchronously waiting 100 ms
+            emit(i) // emit next value
         }
     }
 
