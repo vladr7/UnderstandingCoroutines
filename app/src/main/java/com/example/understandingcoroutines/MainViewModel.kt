@@ -17,21 +17,15 @@ class MainViewModel : ViewModel() {
         main()
     }
 
-    fun main() = runBlocking<Unit> {
-        val flow = simple()
-        flow.transform {number ->
-            emit("number $number")
-            emit("LUL")
-            emit("number ${number * 10}")
-        }.collect {
-            println(it)
-        }
+    suspend fun performRequest(request: Int): String {
+        delay(1000) // imitate long-running asynchronous work
+        return "response $request"
     }
 
-    fun simple() = flow<Int> {
-        (1..3).forEach {
-            emit(it)
-        }
+    fun main() = runBlocking<Unit> {
+        (1..3).asFlow() // a flow of requests
+            .map { request -> performRequest(request) }
+            .collect { response -> println(response) }
     }
 
 
