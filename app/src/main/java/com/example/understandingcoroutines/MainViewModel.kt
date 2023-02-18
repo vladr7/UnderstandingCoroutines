@@ -8,6 +8,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.flow.*
+import java.lang.System.currentTimeMillis
 import kotlin.coroutines.resume
 import kotlin.system.measureTimeMillis
 
@@ -18,24 +19,19 @@ class MainViewModel : ViewModel() {
     }
 
     fun main() = runBlocking<Unit> {
-//        zip()
-//        combine()
-    }
-
-    suspend fun zip() {
-        val nums = (1..10).asFlow().onEach { delay(500L) }
-        val strs = flowOf("one", "two", "three").onEach { delay(10L) }
-        nums.zip(strs) { a, b -> "$a -> $b" }
-            .collect { println(it) }
-    }
-
-    suspend fun combine() {
-        val nums = (1..3).asFlow().onEach { delay(500) }
-        val strs = flowOf("one", "two", "three").onEach { delay(3000) }
-        val startTime = System.currentTimeMillis()
-        nums.combine(strs) { a, b -> "$a -> $b" }
+        val startTime = currentTimeMillis()
+        (1..3).asFlow().onEach { delay(1000) }
+            .flatMapConcat { requestFlow(it) }
             .collect { value ->
-                println("$value at ${System.currentTimeMillis() - startTime} ms from start")
+                println("$value at ${currentTimeMillis() - startTime} ms from start")
             }
     }
+
+    fun requestFlow(i: Int): Flow<String> = flow {
+        emit("$i: First")
+        delay(3000)
+        emit("$i: Second")
+    }
+
+
 }
