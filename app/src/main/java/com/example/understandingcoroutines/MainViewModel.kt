@@ -8,7 +8,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.flow.*
-import java.lang.Math.log
 import kotlin.coroutines.resume
 import kotlin.system.measureTimeMillis
 
@@ -18,21 +17,21 @@ class MainViewModel : ViewModel() {
         main()
     }
 
-    fun simple(): Flow<Int> = flow {
-        println("Flow started")
-        for (i in 1..3) {
-            delay(100)
-            emit(i)
+    fun main() = runBlocking<Unit> {
+        val flow = simple()
+        flow.transform {number ->
+            emit("number $number")
+            emit("LUL")
+            emit("number ${number * 10}")
+        }.collect {
+            println(it)
         }
     }
 
-    fun main() = runBlocking<Unit> {
-        println("Calling simple function...")
-        val flow = simple()
-        println("Calling collect...")
-        flow.collect { value -> println(value) }
-        println("Calling collect again...")
-        flow.collect { value -> println(value) }
+    fun simple() = flow<Int> {
+        (1..3).forEach {
+            emit(it)
+        }
     }
 
 
