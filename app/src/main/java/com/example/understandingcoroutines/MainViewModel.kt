@@ -18,22 +18,24 @@ class MainViewModel : ViewModel() {
     }
 
     fun main() = runBlocking<Unit> {
-        val time = measureTimeMillis {
-            simple()
-                .collectLatest { value ->
-                    println("Collecting $value")
-                    delay(3000) // pretend we are processing it for 3000 ms
-                    println("Done $value")
-                }
-        }
-        println("Collected in $time ms")
+//        zip()
+//        combine()
     }
 
-    fun simple(): Flow<Int> = flow {
-        for (i in 1..10) {
-            delay(100) // pretend we are asynchronously waiting 100 ms
-            emit(i) // emit next value
-        }
+    suspend fun zip() {
+        val nums = (1..10).asFlow().onEach { delay(500L) }
+        val strs = flowOf("one", "two", "three").onEach { delay(10L) }
+        nums.zip(strs) { a, b -> "$a -> $b" }
+            .collect { println(it) }
     }
 
+    suspend fun combine() {
+        val nums = (1..3).asFlow().onEach { delay(500) }
+        val strs = flowOf("one", "two", "three").onEach { delay(3000) }
+        val startTime = System.currentTimeMillis()
+        nums.combine(strs) { a, b -> "$a -> $b" }
+            .collect { value ->
+                println("$value at ${System.currentTimeMillis() - startTime} ms from start")
+            }
+    }
 }
