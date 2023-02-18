@@ -20,10 +20,10 @@ class MainViewModel : ViewModel() {
     fun main() = runBlocking<Unit> {
         val time = measureTimeMillis {
             simple()
-                .conflate() // conflate emissions, don't process each one
-                .collect { value ->
+                .collectLatest { value ->
+                    println("Collecting $value")
                     delay(3000) // pretend we are processing it for 3000 ms
-                    println(value)
+                    println("Done $value")
                 }
         }
         println("Collected in $time ms")
