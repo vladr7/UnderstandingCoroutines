@@ -18,19 +18,22 @@ class MainViewModel : ViewModel() {
         main()
     }
 
-    fun main() = runBlocking<Unit> {
-        val startTime = currentTimeMillis()
-        (1..3).asFlow().onEach { delay(1000) }
-            .flatMapConcat { requestFlow(it) }
-            .collect { value ->
-                println("$value at ${currentTimeMillis() - startTime} ms from start")
-            }
+    fun simple(): Flow<Int> = flow {
+        for (i in 1..3) {
+            println("Emitting $i")
+            emit(i) // emit next value
+        }
     }
 
-    fun requestFlow(i: Int): Flow<String> = flow {
-        emit("$i: First")
-        delay(3000)
-        emit("$i: Second")
+    fun main() = runBlocking<Unit> {
+        try {
+            simple().collect { value ->
+                println(value)
+                check(value <= 1) { "Collected $value" }
+            }
+        } catch (e: Throwable) {
+            println("Caught $e")
+        }
     }
 
 
