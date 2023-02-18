@@ -17,19 +17,23 @@ class MainViewModel : ViewModel() {
         main()
     }
 
-
     fun main() = runBlocking<Unit> {
-        (1..5).asFlow()
-            .filter {
-                println("Filter $it")
-                it % 2 == 0
-            }
-            .map {
-                println("Map $it")
-                "string $it"
-            }.collect {
-                println("Collect $it")
-            }
+        val time = measureTimeMillis {
+            simple()
+                .buffer()
+                .collect { value ->
+                    delay(2000)
+                    println(value)
+                }
+        }
+        println("Collected in $time ms")
+    }
+
+    fun simple(): Flow<Int> = flow {
+        for (i in 1..3) {
+            delay(1000)
+            emit(i)
+        }
     }
 
 }
