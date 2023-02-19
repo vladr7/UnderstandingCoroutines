@@ -18,19 +18,19 @@ class MainViewModel : ViewModel() {
         main()
     }
 
-
-    fun foo(): Flow<Int> = flow {
-        for (i in 1..5) {
-            println("Emitting $i")
-            emit(i)
-        }
-    }
-
     fun main() = runBlocking<Unit> {
-        foo().collect { value ->
-            if (value == 3) cancel()
-            println(value)
+        val channel = Channel<Int>()
+        launch {
+            // this might be heavy CPU-consuming computation or async logic, we'll just send five squares
+            for (x in 1..5) {
+                delay(500L)
+                channel.send(x * x)
+            }
+//            channel.close()
         }
+        // here we print five received integers:
+        repeat(5) { println(channel.receive()) }
+        println("Done!")
     }
 
 }
