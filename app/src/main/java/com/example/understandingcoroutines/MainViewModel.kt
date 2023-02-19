@@ -22,15 +22,26 @@ class MainViewModel : ViewModel() {
     enum class Animals { RABBIT, ELEPHANT, SLOTH }
 
     fun main() = runBlocking<Unit> {
-        val channel = Channel<Animals>()
+        val channel = Channel<Animals>(1)
 
-        launch {    //coroutine #1
-            val producer: SendChannel<Animals> = channel
-            producer.send(Animals.RABBIT)
+        launch {
+            repeat(10) {
+                delay(100L)
+                channel.send(Animals.RABBIT)
+            }
         }
-        launch {    //coroutine #2
-            val receiver: ReceiveChannel<Animals> = channel
-            println(receiver.receive())   //prints RABBIT
+        launch {
+            repeat(10) {
+                delay(200L)
+                channel.send(Animals.ELEPHANT)
+            }
         }
+
+        delay(2500L)
+        repeat(10) {
+            println("${channel.receive()}")
+        }
+
+        coroutineContext.cancelChildren()
     }
 }
