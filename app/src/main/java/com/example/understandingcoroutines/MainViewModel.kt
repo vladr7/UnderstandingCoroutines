@@ -19,29 +19,27 @@ class MainViewModel : ViewModel() {
         main()
     }
 
-    enum class Animals { RABBIT, ELEPHANT, SLOTH }
-
     fun main() = runBlocking<Unit> {
-        val channel = Channel<Animals>(1)
+        val tickerChannel = ticker(delayMillis = 100, initialDelayMillis = 0) // create ticker channel
+        var nextElement = withTimeoutOrNull(1) { tickerChannel.receive() }
+        println("Initial element is available immediately: $nextElement") // no initial delay
 
-        launch {
-            repeat(10) {
-                delay(100L)
-                channel.send(Animals.RABBIT)
-            }
-        }
-        launch {
-            repeat(10) {
-                delay(200L)
-                channel.send(Animals.ELEPHANT)
-            }
-        }
+        nextElement = withTimeoutOrNull(50) { tickerChannel.receive() } // all subsequent elements have 100ms delay
+        println("Next element is not ready in 50 ms: $nextElement")
 
-        delay(2500L)
-        repeat(10) {
-            println("${channel.receive()}")
-        }
+        nextElement = withTimeoutOrNull(60) { tickerChannel.receive() }
+        println("Next element is ready in 100 ms: $nextElement")
 
-        coroutineContext.cancelChildren()
+        // Emulate large consumption delays
+        println("Consumer pauses for 150ms")
+        delay(150)
+        // Next element is available immediately
+        nextElement = withTimeoutOrNull(1) { tickerChannel.receive() }
+        println("Next element is available immediately after large consumer delay: $nextElement")
+        // Note that the pause between `receive` calls is taken into account and next element arrives faster
+        nextElement = withTimeoutOrNull(60) { tickerChannel.receive() }
+        println("Next element is ready in 50ms after consumer pause in 150ms: $nextElement")
+
+        tickerChannel.cancel() // indicate that no more elements are needed
     }
 }
