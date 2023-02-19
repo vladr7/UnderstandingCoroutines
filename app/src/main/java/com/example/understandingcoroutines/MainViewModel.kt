@@ -4,12 +4,10 @@ import android.icu.number.Notation.simple
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.GlobalScope.coroutineContext
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.*
 import java.lang.System.currentTimeMillis
 import kotlin.coroutines.resume
@@ -21,13 +19,18 @@ class MainViewModel : ViewModel() {
         main()
     }
 
-    fun main() = runBlocking<Unit> {
-        val squares = produceSquares()
-        squares.consumeEach { println(it) }
-        println("Done!")
-    }
+    enum class Animals { RABBIT, ELEPHANT, SLOTH }
 
-    fun CoroutineScope.produceSquares(): ReceiveChannel<Int> = produce {
-        for (x in 1..5) send(x * x)
+    fun main() = runBlocking<Unit> {
+        val channel = Channel<Animals>()
+
+        launch {    //coroutine #1
+            val producer: SendChannel<Animals> = channel
+            producer.send(Animals.RABBIT)
+        }
+        launch {    //coroutine #2
+            val receiver: ReceiveChannel<Animals> = channel
+            println(receiver.receive())   //prints RABBIT
+        }
     }
 }
