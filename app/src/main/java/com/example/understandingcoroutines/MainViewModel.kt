@@ -1,54 +1,32 @@
 package com.example.understandingcoroutines
 
-import android.icu.number.Notation.simple
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.Channel.Factory.CONFLATED
-import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
-import java.lang.Math.log
-import kotlin.coroutines.resume
-import kotlin.system.measureTimeMillis
 
 class MainViewModel : ViewModel() {
 
     init {
-//        main()
         state()
     }
 
-    fun stateFunc(): MutableStateFlow<Boolean> {
+    fun sharedFunc(): MutableSharedFlow<Boolean> {
         println("Flow started")
-        return MutableStateFlow<Boolean>(true)
+        return MutableSharedFlow<Boolean>(replay = 1, onBufferOverflow = BufferOverflow.DROP_LATEST) // this is EXACTLY a StateFlow (without initial value)
+        /**
+         * Use SharedFlow when you need a StateFlow with tweaks in its behavior such as extra buffering, replaying more values, or omitting the initial value.
+         */
     }
 
     private fun state() = runBlocking<Unit> {
-        println("calling stateFunc")
-        val stateFlow = stateFunc()
+        println("calling sharedFunc")
+        val sharedFlow = sharedFunc()
+        sharedFlow.emit(true)
+        delay(100L)
         println("Calling collect...")
-        stateFlow.collect { value -> println(value) }
+        sharedFlow.collect { value -> println(value) }
         println("Calling collect again...")
-        stateFlow.collect { value -> println(value) }
+        sharedFlow.collect { value -> println(value) }
     }
-
-    fun simple(): Flow<Int> = flow {
-        println("Flow started")
-        for (i in 1..3) {
-            delay(100)
-            emit(i)
-        }
-    }
-
-    fun main() = runBlocking<Unit> {
-        println("Calling simple function...")
-        val flow = simple()
-        println("Calling collect...")
-        flow.collect { value -> println(value) }
-        println("Calling collect again...")
-        flow.collect { value -> println(value) }
-    }
-
-
 }
